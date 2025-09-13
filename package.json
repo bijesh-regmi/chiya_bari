@@ -1,0 +1,22 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "video sharing platform backend",
+  "license": "ISC",
+  "author": "bijesh regmi",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --watch --env-file=.env src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "mongoose": "^8.18.1",
+    "mongoose-aggregate-paginate-v2": "^1.1.4",
+    "prettier": "^3.6.2"
+  }
+}
