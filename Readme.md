@@ -1,2 +1,2 @@
--this is my first time learning about backend
--first project in backend 
+-a youtube insired video sharing app
+-mainly focused on backend stuff
