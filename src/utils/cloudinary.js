@@ -13,7 +13,6 @@ cloudinary.config({
 const uploadOnCloudinary = async (localFilePath) => {
     try {
         if (!localFilePath) return "Local File Path Not Found!!"
-
         // Upload file to Cloudinary
         // Uses the global config object implicitly for credentials
         const response = await cloudinary.uploader.upload(localFilePath, {
