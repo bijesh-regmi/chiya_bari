@@ -113,7 +113,7 @@ export const registerUser = asyncHandler(async (req, res) => {
         );
 });
 
-export const userLogin = asyncHandler(async (req, resp) => {
+export const userLogin = asyncHandler(async (req, res) => {
     //get data from body
     //check username and email
     //check if user exists
@@ -138,4 +138,59 @@ export const userLogin = asyncHandler(async (req, resp) => {
     }
     const { accessToken, refreshToken } =
         await generateAccessTokenAndRefreshToken(user._id);
+
+    //since the reference to the user is not outdated i.e empty so we need to have another db call to get the user
+    const loggedInUser = await User.findById(user._id).select(
+        "-password -refreshToken"
+    );
+
+    //when sending cookie, we need options
+    const options = {
+        httpOnly: true,
+        secure: true
+    };
+    // set access token cookie
+    // options={
+    //   httpOnly: true,       prevents client-side JS from reading the cookie
+    //   secure: true,         cookie only sent over HTTPS
+    //   sameSite: "strict",   CSRF protection
+    //   maxAge: 15 * 60 * 1000 15 minutes
+    // });
+    return (
+        res
+            .status(200)
+            //in resp use "cookie" for single cookie
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json(
+                new ApiResponse(
+                    200,
+                    {
+                        //sent tokens in case user want to set their own cookie eg in localstorage only
+                        user: loggedInUser,
+                        refreshToken,
+                        accessToken
+                    },
+                    "User loggedIn Successfully"
+                )
+            )
+    );
+});
+
+export const userLogOut = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    await User.findByIdAndUpdate(
+        userId,
+        { $unset: { refreshToken: "" } },
+        { new: true }
+    );
+    const options = {
+        httpOnly: true,
+        secure: true
+    };
+    return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponse(200, {}, "User logged Out"));
 });
