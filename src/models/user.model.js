@@ -58,6 +58,7 @@ userSchema.pre("save", async function (next) {
     this.password = await bcrypt.hash(this.password, 10);
 });
 
+//we define instance method using documentSchema.methods. as below
 //instance method is one you define on the document instance and not on model itself
 //instance method to compare the password for correctness
 userSchema.methods.isPasswordCorrect = async function (password) {
@@ -65,24 +66,24 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 };
 
 //generating the access and refresh token for jwt
-userSchema.method.generateAccessToken = function () {
+userSchema.methods.generateAccessToken = function () {
     //does not requires to be async as it is not time consuming and db operation is not done
     //this._id, this.username, etc. are already loaded in the Mongoose document instance.
     return jwt.sign(
         {
             _id: this._id,
             username: this.username,
-            email: this.username,
+            email: this.email,
             fullName: this.fullName
         },
         process.env.ACCESS_TOKEN_SECRET_KEY,
         {
-            // algorithm:"RS256",//not providing means useing default HMAC SHA256
+            // algorithm:"RS256",//not providing means using default HMAC SHA256
             expiresIn: process.env.ACCESS_TOKEN_EXPIRY
         }
     );
 };
-userSchema.method.generateRefreshToken = function () {
+userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         {
             //refresh token contains less information so only id is taken
