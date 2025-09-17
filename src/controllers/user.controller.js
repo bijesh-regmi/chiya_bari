@@ -1,5 +1,6 @@
-//TODO: --delete local files when not uploaded to cloudinary
-
+/*TODO: --delete local files when not uploaded to cloudinary
+        --better way to check for req.body fields are proper
+*/
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
@@ -18,8 +19,9 @@ export const registerUser = asyncHandler(async (req, res) => {
     //return response
     const { username, password, email, fullName } = req.body;
     if (
-        [username, password, email, fullName].some(
-            (field) => field?.trim() === ""
+        //check if any of the fields are empty
+        [username, password, email, fullName]?.some(
+            (field) => !field || String(field).trim() === ""
         )
     ) {
         throw new ApiError(400, "All fields are required.");
@@ -78,3 +80,4 @@ export const registerUser = asyncHandler(async (req, res) => {
             new ApiResponse(200, createdUser, "User registered successfully")
         );
 });
+
