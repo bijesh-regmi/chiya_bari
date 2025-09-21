@@ -234,15 +234,14 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
 
         res.status(200)
             .cookie("accessToken", newAccessToken,options)
-            .cookie("refreshToken", newRefreshToken,ooptions)
-            .json(new ApiResponse(200, "Access token refresh successful."));
+            .cookie("refreshToken", newRefreshToken,options)
+            .json(new ApiResponse(200, {},"Access token refresh successful."));
     } catch (error) {
         throw new ApiError(500, error?.message || "Something we wrong while refreshing token")
     }
 });
 
 export const changePassword = asyncHandler(async (req, res) => {
-
     const { oldPassword, newPassword, confirmPassword } = req.body;
 
     const user = await User.findById(req.user?._id);
@@ -258,7 +257,14 @@ export const changePassword = asyncHandler(async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
-    return res.status(200),json(new ApiResponse("Password changed successfully"))
-    
+    return (
+        res.status(200),
+        json(new ApiResponse(200, {}, "Password change successful"))
+    );
+});
 
+export const getCurrentUse = asyncHandler(async (req, res) => {
+    res.status(200).json(
+        new ApiResponse(200, req.user, "Fetch current user successful")
+    );
 });
