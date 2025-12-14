@@ -52,6 +52,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     if (
         //check if any of the fields are empty
         [username, password, email, fullName]?.some(
+            //String(field).trim() converts to string and removes and leading or trailing whitespaces
             (field) => !field || String(field).trim() === ""
         )
     ) {
@@ -97,7 +98,8 @@ export const registerUser = asyncHandler(async (req, res) => {
         avatar: avatar.url,
         email,
         password,
-        coverImage: coverImage?.url || ""
+        avatar:avatar?.secure_url || "",
+        coverImage: coverImage?.secure_url || ""
     });
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"
@@ -218,7 +220,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
         const user = await User.findById(decodedToken?._id).select(
             "-password -refreshToken"
         );
-        if (!user) throw new ApiError(401, "Token Invalid");
+        if (!user) throw new ApiError(401, "Token Invalid, user not found");
     
         if(incomingRefreshToken !== user?.refreshToken) throw new ApiError(401, "Invalid request's refresh token, expired  or used");
 
@@ -243,24 +245,16 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
 
 export const changePassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword, confirmPassword } = req.body;
-
     const user = await User.findById(req.user?._id);
-
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
-
     if (!isPasswordCorrect) throw new ApiError(400, "Invalid old password");
-
     if (newPassword !== confirmPassword)
         throw new ApiError(400, "Password did not match");
-
     user.password = newPassword;
-
     await user.save({ validateBeforeSave: false });
-
-    return (
-        res.status(200),
-        json(new ApiResponse(200, {}, "Password change successful"))
-    );
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Password change successful"));
 });
 
 export const getCurrentUse = asyncHandler(async (req, res) => {

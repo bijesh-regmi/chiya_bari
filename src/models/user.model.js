@@ -56,6 +56,7 @@ userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();
     //early return makes sure the password is not rehashed every time
     this.password = await bcrypt.hash(this.password, 10);
+    next()
 });
 
 //we define instance method using documentSchema.methods. as below
