@@ -320,4 +320,30 @@ export const updateAvatar = asyncHandler(async (req, res) => {
     );
 });
 
-export const updateCoverImage = asyncHandler(async (req, res) => {});
+export const updateCoverImage = asyncHandler(async (req, res) => {
+    const imagePath = req.file?.path;
+    if (!imagePath) throw new ApiError(400, "Problem uploading image");
+
+    const coverImage = await uploadOnCloudinary(imagePath);
+    if (!coverImage)
+        throw new ApiError(500, "Error while uploading file to the cloud");
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                coverImage: coverImage?.secure_url
+            }
+        },
+        {
+            new: true
+        }
+    );
+    res.status(200).json(
+        200,
+        coverImage.secure_url,
+        "CoverImage aupdated successfully"
+    );
+});
+
+

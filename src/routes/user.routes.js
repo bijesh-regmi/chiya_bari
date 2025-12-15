@@ -5,7 +5,8 @@ import {
     registerUser,
     userLogin,
     userLogOut,
-    updateAccoutnDetails
+    updateAccoutnDetails,
+    updateCoverImage
 } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.middleware.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
@@ -26,6 +27,19 @@ router.route("/get-current-user").post(authenticate, getCurrentUse);
 router.route("/update-account").patch(authenticate, updateAccoutnDetails);
 router
     .route("/avatar")
-    .patch(authenticate, upload.single({ name: "avatar" }), authenticate);
+    .patch(
+        authenticate,
+        upload.single({ name: "avatar" }),
+        authenticate,
+        updateCoverImage
+    );
+router
+    .route("/cover-image")
+    .patch(
+        authenticate,
+        upload.single({ name: "coverImage" }),
+        authenticate,
+        updateCoverImage
+    );
 
 export default router;
