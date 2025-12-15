@@ -3,7 +3,7 @@ import asyncHandler from "../utils/asyncHandler";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model";
 
-const authMiddleware = asyncHandler(async (req, res, next) => {
+const authenticate = asyncHandler(async (req, res, next) => {
     const accessToken =
         req.cookies?.accessToken ||
         req.headers?.authorization?.startsWith("Bearer ")
@@ -40,4 +40,4 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
     next();
 });
 
-export default authMiddleware;
+export default authenticate;

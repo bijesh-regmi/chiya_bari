@@ -98,7 +98,7 @@ export const registerUser = asyncHandler(async (req, res) => {
         avatar: avatar.url,
         email,
         password,
-        avatar:avatar?.secure_url || "",
+        avatar: avatar?.secure_url || "",
         coverImage: coverImage?.secure_url || ""
     });
     const createdUser = await User.findById(user._id).select(
@@ -203,44 +203,53 @@ export const userLogOut = asyncHandler(async (req, res) => {
 });
 
 export const refreshAccessToken = asyncHandler(async (req, res) => {
-    //take from req.body in case the req is from mobile app
-    //prettier-ignore
+    const incomingRefreshToken = req.cookies?.refreshToken;
+
+    if (!incomingRefreshToken) {
+        throw new ApiError(401, "Unauthorized request");
+    }
+
+    let decodedToken;
     try {
-        const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
-        if (!incomingRefreshToken) throw new ApiError(401, "Unauthorized request");
-    
-        
-        const decodedToken = jwt.verify(
+        decodedToken = jwt.verify(
             incomingRefreshToken,
             process.env.REFRESH_TOKEN_SECRET_KEY
         );
-        if (!decodedToken) throw new ApiError(401, "Invalid Refresh Token");
-    
-    
-        const user = await User.findById(decodedToken?._id).select(
-            "-password -refreshToken"
-        );
-        if (!user) throw new ApiError(401, "Token Invalid, user not found");
-    
-        if(incomingRefreshToken !== user?.refreshToken) throw new ApiError(401, "Invalid request's refresh token, expired  or used");
-
-        const { newAccessToken, newRefreshToken } = await generateAccessTokenAndRefreshToken(user._id);
-
-        user.refreshToken = newRefreshToken;
-        await user.save({validateBeforeSave:false })
-
-        const options={
-            httpOnly: true,
-            secure:true
-        }
-
-        res.status(200)
-            .cookie("accessToken", newAccessToken,options)
-            .cookie("refreshToken", newRefreshToken,options)
-            .json(new ApiResponse(200, {},"Access token refresh successful."));
     } catch (error) {
-        throw new ApiError(500, error?.message || "Something we wrong while refreshing token")
+        if (error.name === "TokenExpiredError") {
+            throw new ApiError(401, "Refresh token expired");
+        }
+        throw new ApiError(401, "Invalid refresh token");
     }
+
+    const user = await User.findById(decodedToken._id);
+
+    if (!user) {
+        throw new ApiError(401, "Invalid refresh token");
+    }
+
+    if (incomingRefreshToken !== user.refreshToken) {
+        throw new ApiError(401, "Refresh token reuse detected");
+    }
+
+    const { accessToken, refreshToken } = generateAccessAndRefreshToken(
+        user._id
+    );
+
+    // rotate refresh token
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+    const options = {
+        httpOnly: true,
+        secure: true
+    };
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json({
+            message: "Access token refreshed successfully"
+        });
 });
 
 export const changePassword = asyncHandler(async (req, res) => {
@@ -260,5 +269,27 @@ export const changePassword = asyncHandler(async (req, res) => {
 export const getCurrentUse = asyncHandler(async (req, res) => {
     res.status(200).json(
         new ApiResponse(200, req.user, "Fetch current user successful")
+    );
+});
+
+export const updateAccoutnDetails = asyncHandler(async (req, res) => {
+    let { fullName, email } = req.body;
+    fullName = fullName?.trim();
+    email = email?.trim();
+    if (!fullName && !email) throw new ApiError(400, "fields cannot be empty");
+
+    const updateFields = {};
+    if (fullName !== undefined) updateFields.fullName = fullName;
+    if (email !== undefined) updateFields.email = email;
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: updateFields
+        },
+        {
+            new: true,
+            runValidators: true
+        }
     );
 });
