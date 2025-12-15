@@ -20,9 +20,12 @@ router.route("/register").post(
 );
 router.route("/login").post(userLogin);
 //secured routes
-router.route("/logout").post(verifyJWT, userLogOut);
+router.route("/logout").post(authenticate, userLogOut);
 router.route("/refresh-token").post(refreshAccessToken);
-router.route("/get-current-user").post(verifyJWT,getCurrentUse)
-router.route("update-details").get(authenticate,updateAccoutnDetails)
+router.route("/get-current-user").post(authenticate, getCurrentUse);
+router.route("/update-account").patch(authenticate, updateAccoutnDetails);
+router
+    .route("/avatar")
+    .patch(authenticate, upload.single({ name: "avatar" }), authenticate);
 
 export default router;

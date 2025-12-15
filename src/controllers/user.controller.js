@@ -293,3 +293,31 @@ export const updateAccoutnDetails = asyncHandler(async (req, res) => {
         }
     );
 });
+
+export const updateAvatar = asyncHandler(async (req, res) => {
+    const avatarPath = req.file?.path;
+    if (!avatarPath) throw new ApiError(400, "Problem uploading image");
+
+    const avatar = await uploadOnCloudinary(avatarPath);
+    if (!avatar)
+        throw new ApiError(500, "Error while uploading file to the cloud");
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                avatar: avatar?.secure_url
+            }
+        },
+        {
+            new: true
+        }
+    );
+    res.status(200).json(
+        200,
+        avatar.secure_url,
+        "Avatar aupdated successfully"
+    );
+});
+
+export const updateCoverImage = asyncHandler(async (req, res) => {});
