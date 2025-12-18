@@ -35,9 +35,15 @@ const userSchema = new Schema(
         coverImage: {
             type: String
         },
+        subscribedTo:[
+            {
+                type:Schema.Types.ObjectId,
+                ref: "User"  
+            }
+        ],
         watchHistory: [
             {
-                type: mongoose.Schema.Types.ObjectId,
+                type: Schema.Types.ObjectId,
                 ref: "Video"
             }
         ],

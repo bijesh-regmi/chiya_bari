@@ -39,15 +39,6 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
 };
 
 export const registerUser = asyncHandler(async (req, res) => {
-    //get user details from frontend
-    //validation
-    //check if user exists: email and username
-    //check for images: avatar is required
-    //upload to cloudinary
-    //create user object- entry in the db
-    //check for user creation
-    //remove password and refresh token from response
-    //return response
     const { username, password, email, fullName } = req.body;
     if (
         //check if any of the fields are empty
@@ -82,10 +73,6 @@ export const registerUser = asyncHandler(async (req, res) => {
     if (!avatarLocalPath) throw new ApiError(400, "Avatar file is required");
     //upload on cloudinary
     const avatar = await uploadOnCloudinary(avatarLocalPath);
-    // let coverImage
-    // if (coverImageLocalPath) {
-    //     coverImage = await uploadOnCloudinary(coverImageLocalPath);
-    // }
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
     if (!avatar) {
         throw new ApiError(400, "Avatar is required");
@@ -346,4 +333,61 @@ export const updateCoverImage = asyncHandler(async (req, res) => {
     );
 });
 
+export const getUserChannelProfile = asyncHandler(async (req, res) => {
+    //this controller is when viewing a user profile, doesnot necessarily their own, hence we need to get the user id or username from request parameter
+    const { username } = req.params;
+    if (!username?.trim()) throw new ApiError(400, "username is missing");
 
+    const channel = await awaitUser.aggregate([
+        {
+            $match: {
+                username: "tony_stark"
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields: {
+                channelsSubscribedTo: {
+                    $size: "$subscribedTo"
+                },
+                subscribersCount: {
+                    $size: "$subscribers"
+                },
+                isSubscribed: {
+                    $in: [req?.user?._id, "$subscribers.subscriber"]
+                }
+            }
+        },
+        {
+            $project: {
+                username: 1,
+                fullName: 1,
+                subscribersCount: 1,
+                channelsSubscribedTo: 1,
+                isSubscribed: 1,
+                avatar: 1,
+                coverImage: 1,
+                email: 1
+            }
+        }
+    ]);
+    if (!channel?.length) throw new ApiError(404, "Channel not found");
+    res.status(200).json(
+        new ApiResponse(200, channel[0], "Channel fetched successful")
+    );
+});

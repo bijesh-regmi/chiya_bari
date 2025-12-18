@@ -6,7 +6,8 @@ import {
     userLogin,
     userLogOut,
     updateAccoutnDetails,
-    updateCoverImage
+    updateCoverImage,
+    getUserChannelProfile
 } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.middleware.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
@@ -41,5 +42,6 @@ router
         authenticate,
         updateCoverImage
     );
+router.route("/channel/:username").get(authenticate,getUserChannelProfile)
 
 export default router;
