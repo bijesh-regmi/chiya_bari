@@ -28,20 +28,14 @@ router.route("/get-current-user").post(authenticate, getCurrentUse);
 router.route("/update-account").patch(authenticate, updateAccoutnDetails);
 router
     .route("/avatar")
-    .patch(
-        authenticate,
-        upload.single({ name: "avatar" }),
-        authenticate,
-        updateCoverImage
-    );
+    .patch( authenticate, upload.single({ name: "avatar" }), updateCoverImage);
 router
     .route("/cover-image")
     .patch(
         authenticate,
         upload.single({ name: "coverImage" }),
-        authenticate,
         updateCoverImage
     );
-router.route("/channel/:username").get(authenticate,getUserChannelProfile)
+router.route("/channel/:username").get(authenticate, getUserChannelProfile);
 
 export default router;
