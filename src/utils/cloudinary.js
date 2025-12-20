@@ -10,8 +10,8 @@ cloudinary.config({
 });
 
 // Function to upload a file to Cloudinary
-const uploadOnCloudinary = async (localFilePath) => {
-    console.log("cloudinary upload called>>>!")
+export const uploadOnCloudinary = async (localFilePath) => {
+    console.log("cloudinary upload called>>>!");
     try {
         if (!localFilePath) return "Local File Path Not Found!!";
         // Upload file to Cloudinary
@@ -20,7 +20,7 @@ const uploadOnCloudinary = async (localFilePath) => {
             resource_type: "auto" // Automatically detect the file type (image, video, etc.)
         });
         fs.unlinkSync(localFilePath);
-        console.log(`File is uploaded successfully on: ${response.url}`)
+        console.log(`File is uploaded successfully on: ${response.url}`);
         return response;
     } catch (err) {
         console.error("Error uploading file to Cloudinary:", err);
@@ -28,4 +28,10 @@ const uploadOnCloudinary = async (localFilePath) => {
         fs.unlinkSync(localFilePath); //unlink is deleting the file with sync as it need to happen before moving on
     }
 };
-export default uploadOnCloudinary;
+export const deleteCloudinary = async (publicId) => {
+    if (publicId) return "image id not valid";
+
+    const response = await cloudinary.uploader.destroy(publicId);
+    console.log(response)
+    return response;
+};

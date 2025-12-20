@@ -5,22 +5,10 @@ import asyncHandler from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 import ApiError from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import uploadOnCloudinary from "../utils/cloudinary.js";
+import { uploadOnCloudinary, deleteCloudinary } from "../utils/cloudinary.js";
 import ApiResponse from "../utils/ApiResponse.js";
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
-    /**
-     * get the user by id
-     * generate access and refresh token
-     * save the refresh token in the database
-     * save the document,  we use { validateBeforeSave: false } here because:
-     * - We are only updating a single field (refreshToken).
-     * - We don't want to re-run all schema validations (like required fields)
-     *   which are already satisfied in the existing document.
-     * - This avoids accidental validation errors on fields that may be
-     *   optional or unchanged.
-     * return the tokens
-     */
     try {
         const user = await User.findById(userId);
         const accessToken = user.generateAccessToken();
@@ -65,7 +53,7 @@ export const registerUser = asyncHandler(async (req, res) => {
             filename: "1694567890-123456789.png",
             path: "public/temp/1694567890-123456789.png",
             size: 12345
-            } 
+            }
         ]
 }*/
     const avatarLocalPath = req.files?.avatar?.[0]?.path;
@@ -104,12 +92,6 @@ export const registerUser = asyncHandler(async (req, res) => {
 });
 
 export const userLogin = asyncHandler(async (req, res) => {
-    //get data from body
-    //check username and email
-    //check if user exists
-    //check password
-    //generate access token and refresh token
-    //send cookie
     if (!req.body || Object.keys(req.body).length === 0) {
         throw new ApiError(400, "Request body cannot be empty");
     }
@@ -284,22 +266,18 @@ export const updateAccoutnDetails = asyncHandler(async (req, res) => {
 export const updateAvatar = asyncHandler(async (req, res) => {
     const avatarPath = req.file?.path;
     if (!avatarPath) throw new ApiError(400, "Problem uploading image");
-
+    const user = await User.findById(req.user?._id);
     const avatar = await uploadOnCloudinary(avatarPath);
     if (!avatar)
         throw new ApiError(500, "Error while uploading file to the cloud");
-
-    const user = await User.findByIdAndUpdate(
-        req.user?._id,
-        {
-            $set: {
-                avatar: avatar?.secure_url
-            }
-        },
-        {
-            new: true
-        }
-    );
+    if (user.avatar) {
+        const segment = user.avatar.split("/");
+        const filenameWithExt = segment[segment.length - 1]; // 'imageName.jpg'
+        const publicId = filenameWithExt.split(".")[0];
+        await deleteCloudinary(publicId);
+    }
+    user.avatar = avatar.secure_url;
+    await user.save();
     res.status(200).json(
         200,
         avatar.secure_url,
@@ -310,22 +288,18 @@ export const updateAvatar = asyncHandler(async (req, res) => {
 export const updateCoverImage = asyncHandler(async (req, res) => {
     const imagePath = req.file?.path;
     if (!imagePath) throw new ApiError(400, "Problem uploading image");
-
+    const user = await User.findById(req.user?._id);
     const coverImage = await uploadOnCloudinary(imagePath);
     if (!coverImage)
         throw new ApiError(500, "Error while uploading file to the cloud");
-
-    const user = await User.findByIdAndUpdate(
-        req.user?._id,
-        {
-            $set: {
-                coverImage: coverImage?.secure_url
-            }
-        },
-        {
-            new: true
-        }
-    );
+    if (user.coverImage) {
+        const segments = user.coverImage.split("/");
+        const filenameWithExt = segments[segments.length - 1];
+        const publicId = filenameWithExt.split(".")[0];
+        await deleteCloudinary(publicId);
+    }
+    user.coverImage = coverImage.secure_url;
+    await user.save();
     res.status(200).json(
         200,
         coverImage.secure_url,
@@ -377,7 +351,7 @@ export const getUserChannelProfile = asyncHandler(async (req, res) => {
             $project: {
                 username: 1,
                 fullName: 1,
-                subscribersCount: 1,
+                subscriibersCount: 1,
                 channelsSubscribedTo: 1,
                 isSubscribed: 1,
                 avatar: 1,

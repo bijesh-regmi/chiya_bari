@@ -7,7 +7,8 @@ import {
     userLogOut,
     updateAccoutnDetails,
     updateCoverImage,
-    getUserChannelProfile
+    getUserChannelProfile,
+    getWatchHistory
 } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.middleware.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
@@ -28,7 +29,7 @@ router.route("/get-current-user").post(authenticate, getCurrentUse);
 router.route("/update-account").patch(authenticate, updateAccoutnDetails);
 router
     .route("/avatar")
-    .patch( authenticate, upload.single({ name: "avatar" }), updateCoverImage);
+    .patch(authenticate, upload.single({ name: "avatar" }), updateCoverImage);
 router
     .route("/cover-image")
     .patch(
@@ -37,5 +38,5 @@ router
         updateCoverImage
     );
 router.route("/channel/:username").get(authenticate, getUserChannelProfile);
-
+router.route("/history").get(authenticate, getWatchHistory);
 export default router;
