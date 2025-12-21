@@ -270,12 +270,13 @@ export const updateAvatar = asyncHandler(async (req, res) => {
     const avatar = await uploadOnCloudinary(avatarPath);
     if (!avatar)
         throw new ApiError(500, "Error while uploading file to the cloud");
-    if (user.avatar) {
-        const segment = user.avatar.split("/");
-        const filenameWithExt = segment[segment.length - 1]; // 'imageName.jpg'
-        const publicId = filenameWithExt.split(".")[0];
-        await deleteCloudinary(publicId);
-    }
+    // if (user.avatar) {
+    //     const segment = user.avatar.split("/");
+    //     const filenameWithExt = segment[segment.length - 1]; // 'imageName.jpg'
+    //     const publicId = filenameWithExt.split(".")[0];
+    //     await deleteCloudinary(publicId);
+    // }
+    
     user.avatar = avatar.secure_url;
     await user.save();
     res.status(200).json(
