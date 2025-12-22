@@ -200,7 +200,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Refresh token reuse detected");
     }
 
-    const { accessToken, refreshToken } = generateAccessAndRefreshToken(
+    const { accessToken, refreshToken } = generateAccessTokenAndRefreshToken(
         user._id
     );
 
@@ -275,7 +275,7 @@ export const updateAvatar = asyncHandler(async (req, res) => {
     //     const publicId = filenameWithExt.split(".")[0];
     //     await deleteCloudinary(publicId);
     // }
-    
+
     user.avatar = avatar.secure_url;
     await user.save();
     res.status(200).json(
@@ -312,10 +312,10 @@ export const getUserChannelProfile = asyncHandler(async (req, res) => {
     const { username } = req.params;
     if (!username?.trim()) throw new ApiError(400, "username is missing");
 
-    const channel = await awaitUser.aggregate([
+    const channel = await User.aggregate([
         {
             $match: {
-                username: "tony_stark"
+                username: username?.toLowerCase()
             }
         },
         {
@@ -367,7 +367,7 @@ export const getUserChannelProfile = asyncHandler(async (req, res) => {
 });
 
 export const getWatchHistory = asyncHandler(async (req, res) => {
-    await User.aggregate([
+    const user = await User.aggregate([
         {
             $match: {
                 _id: new mongoose.Types.ObjectId(req.user._id)
@@ -409,4 +409,13 @@ export const getWatchHistory = asyncHandler(async (req, res) => {
             }
         }
     ]);
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                user[0].watchHistory,
+                "Watch history fetched successfully"
+            )
+        )
 });
