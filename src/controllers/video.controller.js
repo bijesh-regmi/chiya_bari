@@ -4,24 +4,24 @@ import ApiResponse from "../utils/ApiResponse.js";
 import { Video } from "../models/video.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import {
-    generateThumbnailClkoudinary,
+    generateThumbnailCloudinary,
     generateThumbnailFfmpeg
 } from "../utils/generateThumbnail.js";
 import isValidUrl from "../utils/isValidURL.js";
 
 export const uploadVideo = asyncHandler(async (req, res) => {
     const { title, description } = req.body;
-
-    if (!title.trim()) throw new ApiError(400, "Title is required");
-    //get the local path of files
     const videoPath = req.files?.videoFile?.[0].path;
     const thumbnailPath = req.files?.thumbnail?.[0].path;
 
-    if (!videoPath) throw new ApiError(400, "Video required");
+    if (!title.trim()) throw new ApiError(400, "Title is required");
+    if (!(videoPath && thumbnailPath))
+        throw new ApiError(400, "Video required");
+
     // const video = await uploadOnCloudinary(videoPath);
     // if (!thumbnailPath) {
     //     //generate thumbnail using ffmpeg
-    //     let thumbnail = await generateThumbnailClkoudinary(video.public_id);
+    //     let thumbnail = await generateThumbnailCloudinary(video.public_id);
     //     if (!thumbnail || !isValidUrl(thumbnail)) {
     //         thumbnail = await generateThumbnailFfmpeg(video);
     //     }
@@ -56,4 +56,13 @@ export const uploadVideo = asyncHandler(async (req, res) => {
     );
 });
 
-export const getAllVideo = asyncHandler(async (req, res) => {});
+export const getAllVideo = asyncHandler(async (req, res) => {
+    const {
+        page = 1,
+        limit = 10,
+        query = "",
+        sortBy = "createdAt",
+        sortType = "desc",
+        userId
+    } = req.query;
+});
