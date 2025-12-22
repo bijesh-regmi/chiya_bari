@@ -2,3 +2,4 @@
 2.test image update algorithm(find a better way to do it, if possible)
 3.better way to delete stuff off cloudinary
 4.improve user controllers based on new thing from video controllers
+5.implement ffmpeg to generate thumbnail
