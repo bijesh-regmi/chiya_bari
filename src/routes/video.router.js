@@ -1,14 +1,27 @@
 import { Router } from "express";
-import { uploadVideo } from "../controllers/video.controller.js";
+import { getAllVideo, uploadVideo } from "../controllers/video.controller.js";
 import upload from "../middlewares/multer.middleware.js";
 import authenticate from "../middlewares/auth.middleware.js";
 const router = Router();
 
-router.route("/upload").post(
-    authenticate,
-    upload.fields([
-        { name: "videoFile", maxCount: 1 },
-        { name: "thumbnail", maxCount: 1 }
-    ]),
-    uploadVideo
-);
+router
+    .route("/")
+    .post(
+        //since we uploading video requires user to be loggedin, we donot require any query string, can get id from req.user
+        authenticate,
+        upload.fields([
+            { name: "videoFile", maxCount: 1 },
+            { name: "thumbnail", maxCount: 1 }
+        ]),
+        uploadVideo
+    )
+    //getting all video, means we need to take id for the user via query string
+    .get(authenticate, getAllVideo); // takes query string eg. /api/v1/videos?page=1&
+
+router
+    .route("/:videoId")
+    .get(authenticate, getVideoById)
+    .delete(authenticate, deleteVideo)
+    .patch(authenticate, updateVideo)
+    .patch(authenticate,)
+

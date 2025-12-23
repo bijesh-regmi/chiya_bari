@@ -2,12 +2,14 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { Video } from "../models/video.model.js";
+import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import {
     generateThumbnailCloudinary,
     generateThumbnailFfmpeg
 } from "../utils/generateThumbnail.js";
 import isValidUrl from "../utils/isValidURL.js";
+import mongoose, { isValidObjectId } from "mongoose";
 
 export const uploadVideo = asyncHandler(async (req, res) => {
     const { title, description } = req.body;
@@ -60,9 +62,93 @@ export const getAllVideo = asyncHandler(async (req, res) => {
     const {
         page = 1,
         limit = 10,
-        query = "",
         sortBy = "createdAt",
         sortType = "desc",
         userId
     } = req.query;
+
+    let pageNumber = parseInt(page) || 1;
+    let limitNumber = parseInt(limit) || 10;
+    let skip = limitNumber * (pageNumber - 1);
+
+    if (!req.user) throw new ApiError(400, "User is not logged in.");
+    if (!isValidObjectId(userId))
+        throw new ApiError(400, "Invalid query, userId is not valid string");
+
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new ApiError(400, "User not found");
+    }
+
+    let match = {
+        ...{ owner: mongoose.Types.ObjectId(userId) }
+    };
+
+    if (req.user?._id === userId) {
+        match.isPublished = true;
+    }
+
+    const videoList = await Video.aggregate([
+        {
+            $match: match
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner"
+            }
+        },
+        {
+            $unwind: "$owner" // $unwind is used to flatten the array as the result of lookup is array
+        },
+        {
+            $sort: {
+                [sortBy]: sortType === "asc" ? 1 : -1
+            }
+        },
+        {
+            $skip: skip
+        },
+        {
+            $limit: limitNumber
+        },
+        {
+            $project: {
+                title: 1,
+                thumbnail: 1,
+                views: 1,
+                owner: {
+                    username: "$owner.username",
+                    fullName: "$owner.fullName",
+                    avatar: "$owner.avatar",
+                    subscri
+                },
+                description: 1,
+                duration: 1
+            }
+        }
+    ]);
+    if (!videoList?.length) throw new ApiError(404, "No video found");
+    return res.status(
+        200,
+        new ApiResponse(200, videoList, "Videos fetched successfully")
+    );
 });
+
+export const getVideoById = asyncHandler(async (req, res) => {
+    const { videoId } = req.query;
+    if (!(videoId && isValidObjectId(videoId)))
+        throw new ApiError(400, "Invalid request, no video id provided");
+    const video = await Video.findById(videoId).populate(
+        "owner",
+        "fullName username"
+    );
+    return res
+        .status(200)
+        .json(new ApiResponse(200, video, "Video fetched successfully"));
+});
+export const updateVideo = asyncHandler(async (req, res) => {});
+export const deleteVideo = asyncHandler(async (req, res) => {});
+export const togglePublishStatus = asyncHandler(async (req, res) => {});
