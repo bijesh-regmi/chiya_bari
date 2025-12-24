@@ -30,7 +30,7 @@ export const uploadOnCloudinary = async (localFilePath) => {
 };
 export const deleteCloudinary = async (publicId) => {
     try {
-        if (!publicId) return "image id not valid";
+        if (!publicId) return "id not valid";
 
         const response = await cloudinary.uploader.destroy(publicId);
         console.log(response);

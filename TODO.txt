@@ -2,4 +2,7 @@
 2.test image update algorithm(find a better way to do it, if possible)
 3.better way to delete stuff off cloudinary
 4.improve user controllers based on new thing from video controllers
-5.implement ffmpeg to generate thumbnail
+5.add videos in watchHistory, watch history management
+6.proper error handling in video controllers(try..catch)
+7.if a video is deleted or made private, remove it from watch history and playlist except from the owner
+8.replace cloudinary with aws S3 bucket
