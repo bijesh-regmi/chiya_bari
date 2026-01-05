@@ -1,0 +1,183 @@
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--bg-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-page::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at center, rgba(124, 58, 237, 0.15) 0%, transparent 50%);
+    animation: rotate 30s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.auth-card {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: 48px 40px;
+    box-shadow: var(--shadow-lg);
+    animation: fadeIn 0.5s ease;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.auth-header .logo {
+    font-size: 2rem;
+    font-weight: 700;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.auth-header .logo::before {
+    content: '▶';
+    font-size: 1.5rem;
+}
+
+.auth-header h1 {
+    font-size: 1.75rem;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.auth-header p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.auth-form .form-group {
+    margin-bottom: 0;
+}
+
+.auth-form input {
+    background: var(--bg-primary);
+}
+
+.auth-form .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.auth-form .divider::before,
+.auth-form .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.auth-form button[type="submit"] {
+    margin-top: 8px;
+    padding: 16px;
+    font-size: 1rem;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.auth-footer a {
+    color: var(--accent-secondary);
+    font-weight: 500;
+    margin-left: 4px;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* File upload in Register */
+.avatar-upload-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.avatar-upload {
+    text-align: center;
+}
+
+.avatar-upload .file-upload {
+    padding: 20px;
+}
+
+.avatar-upload .file-upload-icon {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.avatar-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 8px auto 0;
+    border: 3px solid var(--accent-primary);
+}
+
+.cover-preview {
+    width: 100%;
+    height: 60px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    margin-top: 8px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 32px 24px;
+    }
+
+    .avatar-upload-section {
+        grid-template-columns: 1fr;
+    }
+}

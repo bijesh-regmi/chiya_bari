@@ -123,7 +123,7 @@ export const getAllVideo = asyncHandler(async (req, res) => {
                     username: "$owner.username",
                     fullName: "$owner.fullName",
                     avatar: "$owner.avatar",
-                    subscri
+                    subscribers:"$owner.subscribers"
                 },
                 description: 1,
                 duration: 1
@@ -131,20 +131,34 @@ export const getAllVideo = asyncHandler(async (req, res) => {
         }
     ]);
     if (!videoList?.length) throw new ApiError(404, "No video found");
-    return res.status(
-        200,
-        new ApiResponse(200, videoList, "Videos fetched successfully")
-    );
+    return res
+        .status(200)
+        .json(new ApiResponse(200, videoList, "Videos fetched successfully"));
 });
 
 export const getVideoById = asyncHandler(async (req, res) => {
+    //Logging in is required to view a video
     const { videoId } = req.params;
-    if (!(videoId && isValidObjectId(videoId)))
-        throw new ApiError(400, "Invalid request, no video id provided");
-    const video = await Video.findById(videoId).populate(
+    if (!isValidObjectId(videoId)) throw new ApiError(400, "Invalid video ID");
+
+    const video = await Video.findByIdAndUpdate(videoId).populate(
         "owner",
         "fullName username"
     );
+
+    if (!video) throw new ApiError(404, "Video not found");
+    await Video.findByIdAndUpdate(videoId, {
+        $inc: { views: 1 }
+    });
+    await video.save();
+    const user = await User.findById(req?.user?._id);
+    if (user) {
+        user.watchHistory = user.watchHistory.filter((id) => {
+            id.toString() !== video._id.toString();
+        });
+        user.watchHistory.unshift(video._id);
+        await user.save();
+    }
     return res
         .status(200)
         .json(new ApiResponse(200, video, "Video fetched successfully"));
@@ -160,7 +174,7 @@ export const updateVideo = asyncHandler(async (req, res) => {
 
     let updateData = {};
     if (typeof title === "string" && title.trim()) updateData.title = title;
-    if (typeof description === "string" && desczription.trim())
+    if (typeof description === "string" && description.trim())
         updateData.description = description;
 
     //check for incomming file as thumbnail is not mandetory
@@ -233,5 +247,7 @@ export const togglePublishStatus = asyncHandler(async (req, res) => {
 
     video.isPublished = !video.isPublished;
     await video.save();
-    return res.status(200).json(new ApiResponse(200, {}, "Status toggled successfully"))
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Status toggled successfully"));
 });

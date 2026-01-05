@@ -1,0 +1,129 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(15, 15, 20, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-color);
+  height: 72px;
+  display: flex;
+  align-items: center;
+}
+
+.navbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.navbar .logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar .logo::before {
+  content: '▶';
+  font-size: 1.2rem;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-links a {
+  padding: 10px 16px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.nav-links a:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.nav-links .nav-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 8px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border-color);
+}
+
+.nav-links .user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-links .user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent-primary);
+}
+
+.nav-links .user-name {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.nav-links button {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.nav-links .upload-btn {
+  background: var(--accent-gradient);
+  border: none;
+  padding: 10px 20px;
+  font-weight: 600;
+}
+
+.nav-links .upload-btn::before {
+  content: '+';
+  font-size: 1.1rem;
+  margin-right: 4px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .nav-links a:not(.upload-btn) {
+    display: none;
+  }
+
+  .nav-links .nav-user {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+  }
+
+  .nav-links .user-name {
+    display: none;
+  }
+}

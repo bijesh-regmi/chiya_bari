@@ -6,12 +6,13 @@ import {
     userLogin,
     userLogOut,
     updateAccoutnDetails,
+    updateAvatar,
     updateCoverImage,
     getUserChannelProfile,
     getWatchHistory
 } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.middleware.js";
-import { authenticate } from "../middlewares/auth.middleware.js";
+import authenticate from "../middlewares/auth.middleware.js";
 
 const router = Router();
 router.route("/register").post(
@@ -29,12 +30,12 @@ router.route("/get-current-user").post(authenticate, getCurrentUse);
 router.route("/update-account").patch(authenticate, updateAccoutnDetails);
 router
     .route("/avatar")
-    .patch(authenticate, upload.single({ name: "avatar" }), updateCoverImage);
+    .patch(authenticate, upload.single("avatar"), updateAvatar);
 router
     .route("/cover-image")
     .patch(
         authenticate,
-        upload.single({ name: "coverImage" }),
+        upload.single("coverImage"),
         updateCoverImage
     );
 router.route("/channel/:username").get(authenticate, getUserChannelProfile);

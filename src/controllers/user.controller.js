@@ -1,6 +1,3 @@
-/*TODO: --delete local files when not uploaded to cloudinary
-        --better way to check for req.body fields are proper
-*/
 import asyncHandler from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 import ApiError from "../utils/ApiError.js";
@@ -95,12 +92,23 @@ export const userLogin = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Request body cannot be empty");
     }
     const { email, username, password } = req.body;
-    if (!(username && email)) {
-        //makes sure both email and username are truthy
-        throw new ApiError(400, "email and username is required");
+    if (!(username || email)) {
+        //makes sure at least email or username is provided
+        throw new ApiError(400, "email or username is required");
     }
     if (!password) throw new ApiError(400, "Please enter your password.");
-    const user = await User.findOne({ $and: [{ username }, { email }] });
+
+    // Build query based on what was provided
+    const query = {};
+    if (username && email) {
+        query.$or = [{ username: username.toLowerCase() }, { email }];
+    } else if (username) {
+        query.username = username.toLowerCase();
+    } else {
+        query.email = email;
+    }
+
+    const user = await User.findOne(query);
     if (!user) {
         throw new ApiError(404, "User not found");
     }
@@ -119,7 +127,7 @@ export const userLogin = asyncHandler(async (req, res) => {
         "-password -refreshToken"
     );
 
-    //when sending cookie, we need options
+    //when sending cookie, we need optionsk
     const options = {
         httpOnly: true,
         secure: true
@@ -200,9 +208,8 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Refresh token reuse detected");
     }
 
-    const { accessToken, refreshToken } = generateAccessTokenAndRefreshToken(
-        user._id
-    );
+    const { accessToken, refreshToken } =
+        await generateAccessTokenAndRefreshToken(user._id);
 
     // rotate refresh token
     user.refreshToken = refreshToken;
@@ -259,7 +266,17 @@ export const updateAccoutnDetails = asyncHandler(async (req, res) => {
             new: true,
             runValidators: true
         }
-    );
+    ).select("-password -refreshToken");
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, user, "Account details updated successfully")
+        );
 });
 
 export const updateAvatar = asyncHandler(async (req, res) => {
@@ -278,11 +295,15 @@ export const updateAvatar = asyncHandler(async (req, res) => {
 
     user.avatar = avatar.secure_url;
     await user.save();
-    res.status(200).json(
-        200,
-        avatar.secure_url,
-        "Avatar aupdated successfully"
-    );
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { avatar: avatar.secure_url },
+                "Avatar updated successfully"
+            )
+        );
 });
 
 export const updateCoverImage = asyncHandler(async (req, res) => {
@@ -300,11 +321,15 @@ export const updateCoverImage = asyncHandler(async (req, res) => {
     }
     user.coverImage = coverImage.secure_url;
     await user.save();
-    res.status(200).json(
-        200,
-        coverImage.secure_url,
-        "CoverImage aupdated successfully"
-    );
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { coverImage: coverImage.secure_url },
+                "Cover image updated successfully"
+            )
+        );
 });
 
 export const getUserChannelProfile = asyncHandler(async (req, res) => {
@@ -351,7 +376,7 @@ export const getUserChannelProfile = asyncHandler(async (req, res) => {
             $project: {
                 username: 1,
                 fullName: 1,
-                subscriibersCount: 1,
+                subscribersCount: 1,
                 channelsSubscribedTo: 1,
                 isSubscribed: 1,
                 avatar: 1,

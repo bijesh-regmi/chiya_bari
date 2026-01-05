@@ -1,0 +1,96 @@
+.subscriptions-page {
+  padding-top: 96px;
+  min-height: 100vh;
+}
+
+.subscriptions-header {
+  margin-bottom: 32px;
+}
+
+.subscriptions-header h1 {
+  font-size: 1.75rem;
+  margin-bottom: 8px;
+}
+
+.subscriptions-header p {
+  color: var(--text-muted);
+}
+
+/* Channels grid */
+.channels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.channel-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-normal);
+  text-decoration: none;
+}
+
+.channel-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.channel-card .avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.channel-card .info {
+  flex: 1;
+  min-width: 0;
+}
+
+.channel-card .name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.channel-card .handle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.channel-card .subs {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+/* Empty state */
+.subscriptions-empty {
+  text-align: center;
+  padding: 80px 24px;
+}
+
+.subscriptions-empty-icon {
+  font-size: 5rem;
+  margin-bottom: 24px;
+  opacity: 0.5;
+}
+
+.subscriptions-empty h2 {
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.subscriptions-empty p {
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}

@@ -62,3 +62,8 @@ Recommendations (prioritized)
 - Replace hardcoded/typo variables (`awaitUser`, `tony_stark`) with actual parameters; add owner/channel authorization checks.  
 - Add tests (unit + integration) for user/video controllers, mocking Cloudinary and DB.
 
+
+
+
+
+

@@ -2,4 +2,8 @@
 node_modules
 .prettierignore
 .prettierrc
-js.js
+SQL.sql
+REVIEW.md
+SUBSCRIPTION_ANALYSIS.md
+SUBSCRIPTION_MODEL_ANALYSIS.md
+TODO.txt
